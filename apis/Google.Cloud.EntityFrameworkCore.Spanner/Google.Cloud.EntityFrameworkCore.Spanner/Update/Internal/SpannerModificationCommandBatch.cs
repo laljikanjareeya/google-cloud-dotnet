@@ -34,12 +34,12 @@ namespace Microsoft.EntityFrameworkCore.Update.Internal
 
         private readonly IDiagnosticsLogger<DbLoggerCategory.Database.Command> _logger;
         private readonly List<ModificationCommand> _modificationCommands = new List<ModificationCommand>();
-        private readonly IRelationalTypeMapper _typeMapper;
+        private readonly IRelationalTypeMappingSource _typeMapper;
 
         /// <summary>
         /// This is internal functionality and not intended for public use.
         /// </summary>
-        public SpannerModificationCommandBatch(IRelationalTypeMapper typeMapper,
+        public SpannerModificationCommandBatch(IRelationalTypeMappingSource typeMapper,
             IDiagnosticsLogger<DbLoggerCategory.Database.Command> logger)
         {
             _typeMapper = typeMapper;

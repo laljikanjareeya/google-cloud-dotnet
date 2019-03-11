@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.DependencyInjection
             var builder = new EntityFrameworkRelationalServicesBuilder(serviceCollection)
                 .TryAdd<IDatabase, RelationalDatabase>()
                 .TryAdd<IDatabaseProvider, DatabaseProvider<SpannerOptionsExtension>>()
-                .TryAdd<IRelationalTypeMapper, SpannerTypeMapper>()
+                .TryAdd<IRelationalTypeMappingSource, SpannerTypeMappingSource>()
                 .TryAdd<ISqlGenerationHelper, SpannerSqlGenerationHelper>()
                 //MODEL/MIGRATION SERVICES
                 .TryAdd<IMigrationsAnnotationProvider, SpannerMigrationsAnnotationProvider>()
@@ -57,6 +57,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .TryAdd<IMigrationsSqlGenerator, SpannerMigrationsSqlGenerator>()
                 .TryAdd<IRelationalDatabaseCreator, SpannerDatabaseCreator>()
                 .TryAdd<IConventionSetBuilder, SpannerConventionSetBuilder>()
+                 .TryAdd<IUpdateSqlGenerator, SpannerUpdateSqlGenerator>()
                 //.TryAdd<IHistoryRepository, SpannerHistoryRepository>()
                 .TryAdd<IRelationalConnection>(p => p.GetService<ISpannerRelationalConnection>())
                 .TryAdd<IExecutionStrategyFactory, RelationalExecutionStrategyFactory>()

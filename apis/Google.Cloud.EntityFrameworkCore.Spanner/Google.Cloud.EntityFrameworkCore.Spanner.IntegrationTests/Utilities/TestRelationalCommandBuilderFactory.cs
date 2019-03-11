@@ -27,11 +27,11 @@ namespace Microsoft.EntityFrameworkCore.Utilities
     public class TestRelationalCommandBuilderFactory : IRelationalCommandBuilderFactory
     {
         private readonly IDiagnosticsLogger<DbLoggerCategory.Database.Command> _logger;
-        private readonly IRelationalTypeMapper _typeMapper;
+        private readonly IRelationalTypeMappingSource _typeMapper;
 
         public TestRelationalCommandBuilderFactory(
             IDiagnosticsLogger<DbLoggerCategory.Database.Command> logger,
-            IRelationalTypeMapper typeMapper)
+            IRelationalTypeMappingSource typeMapper)
         {
             _logger = logger;
             _typeMapper = typeMapper;
@@ -46,7 +46,7 @@ namespace Microsoft.EntityFrameworkCore.Utilities
 
             public TestRelationalCommandBuilder(
                 IDiagnosticsLogger<DbLoggerCategory.Database.Command> logger,
-                IRelationalTypeMapper typeMapper)
+                IRelationalTypeMappingSource typeMapper)
             {
                 _logger = logger;
                 ParameterBuilder = new RelationalParameterBuilder(typeMapper);

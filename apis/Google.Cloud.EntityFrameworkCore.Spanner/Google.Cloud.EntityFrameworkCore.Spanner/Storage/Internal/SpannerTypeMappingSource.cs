@@ -23,7 +23,7 @@ namespace Microsoft.EntityFrameworkCore.Storage.Internal
     /// <summary>
     /// This is internal functionality and not intended for public use.
     /// </summary>
-    public class SpannerTypeMapper : RelationalTypeMapper
+    public class SpannerTypeMappingSource : RelationalTypeMappingSource
     {
         //Note: This SpannerTypeMapper serves a key role in all of queries, updates and even migration by handling the
         // conversion between ClrTypes and SpannerTypes.  While this class is fairly simple, it relies heavily on
@@ -44,8 +44,17 @@ namespace Microsoft.EntityFrameworkCore.Storage.Internal
         private static readonly StringTypeMapping s_defaultString
             = new StringTypeMapping(SpannerDbType.String.ToString(), DbType.String, true);
 
+        private static readonly FloatTypeMapping s_float
+            = new FloatTypeMapping(SpannerDbType.Float64.ToString());
+
         private static readonly DoubleTypeMapping s_double
             = new SpannerDoubleTypeMapping();
+
+        private static readonly ShortTypeMapping s_sort
+           = new ShortTypeMapping(SpannerDbType.Int64.ToString(), DbType.Int64);
+
+        private static readonly IntTypeMapping s_int
+           = new IntTypeMapping(SpannerDbType.Int64.ToString(), DbType.Int64);
 
         private static readonly LongTypeMapping s_long
             = new LongTypeMapping(SpannerDbType.Int64.ToString(), DbType.Int64);
@@ -56,8 +65,8 @@ namespace Microsoft.EntityFrameworkCore.Storage.Internal
         private static readonly GuidTypeMapping s_guid
             = new GuidTypeMapping(SpannerDbType.String.ToString(), DbType.String);
 
-        private static readonly SpannerComplexTypeMapping s_byteArray
-            = new SpannerComplexTypeMapping(SpannerDbType.Bytes);
+        private static readonly ByteArrayTypeMapping s_byteArray
+            = new ByteArrayTypeMapping(SpannerDbType.Bytes.ToString());
 
         private static readonly SpannerComplexTypeMapping s_stringArray
             = new SpannerComplexTypeMapping(SpannerDbType.ArrayOf(SpannerDbType.String));
@@ -77,14 +86,14 @@ namespace Microsoft.EntityFrameworkCore.Storage.Internal
         private static readonly Dictionary<Type, RelationalTypeMapping> s_clrTypeMappings
             = new Dictionary<Type, RelationalTypeMapping>
             {
-                {typeof(short), s_long},
-                {typeof(int), s_long},
+                {typeof(short), s_sort},
+                {typeof(int), s_int},
                 {typeof(long), s_long},
                 {typeof(decimal), s_decimal},
                 {typeof(uint), s_long},
                 {typeof(bool), s_bool},
                 {typeof(DateTime), s_datetime},
-                {typeof(float), s_double},
+                {typeof(float), s_float},
                 {typeof(double), s_double},
                 {typeof(string), s_defaultString},
                 {typeof(string[]), s_stringArray},
@@ -92,7 +101,7 @@ namespace Microsoft.EntityFrameworkCore.Storage.Internal
                 {typeof(double[]), s_doubleArray},
                 {typeof(long[]), s_longArray},
                 {typeof(DateTime[]), s_dateArray},
-                {typeof(Guid), s_guid},
+                { typeof(Guid), s_guid},
                 {typeof(byte[]), s_byteArray}
             };
 
@@ -111,41 +120,40 @@ namespace Microsoft.EntityFrameworkCore.Storage.Internal
 
         /// <summary>
         /// </summary>
-        public SpannerTypeMapper(RelationalTypeMapperDependencies dependencies)
-            : base(dependencies)
+        public SpannerTypeMappingSource(TypeMappingSourceDependencies dependencies,
+            RelationalTypeMappingSourceDependencies relationalDependencies)
+            : base(dependencies, relationalDependencies)
         {
         }
 
-        /// <inheritdoc />
-        protected override string GetColumnType(IProperty property)
-            => new RelationalPropertyAnnotations(property).ColumnType;
-
-        /// <inheritdoc />
-        protected override IReadOnlyDictionary<Type, RelationalTypeMapping> GetClrTypeMappings()
-            => s_clrTypeMappings;
-
-        /// <inheritdoc />
-        protected override IReadOnlyDictionary<string, RelationalTypeMapping> GetStoreTypeMappings()
-            => null;
-
-        /// <inheritdoc />
-        protected override RelationalTypeMapping CreateMappingFromStoreType(string storeType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mappingInfo"></param>
+        /// <returns></returns>
+        protected override RelationalTypeMapping FindMapping(in RelationalTypeMappingInfo mappingInfo)
         {
-            if (SpannerDbType.TryParse(storeType, out SpannerDbType parsedType))
+            var clrType = mappingInfo.ClrType;
+            var storeTypeName = mappingInfo.StoreTypeName;
+            var storeTypeNameBase = mappingInfo.StoreTypeNameBase;
+            if (SpannerDbType.TryParse(storeTypeName, out SpannerDbType parsedType))
             {
                 if (!parsedType.Size.HasValue
-                    && s_dbTypeMappings.TryGetValue(parsedType, out RelationalTypeMapping mapping))
+                    && s_dbTypeMappings.TryGetValue(parsedType, out var dbTypemapping))
                 {
-                    return mapping;
+                    return dbTypemapping;
                 }
                 if (parsedType.DbType == DbType.String)
                 {
-                    // return a sized string.
-                    return new StringTypeMapping(storeType, parsedType.DbType, true, parsedType.Size);
+                    return new StringTypeMapping(storeTypeName, parsedType.DbType, true, parsedType.Size);
                 }
-                return new SpannerComplexTypeMapping(parsedType);
             }
-            return null;
+
+            if (clrType != null && s_clrTypeMappings.TryGetValue(clrType, out var mapping))
+            {
+                return mapping;
+            }
+            return base.FindMapping(mappingInfo);
         }
     }
 }

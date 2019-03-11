@@ -40,7 +40,7 @@ namespace Microsoft.EntityFrameworkCore.Storage.Internal
         /// </summary>
         public SpannerRelationalCommandBuilderFactory(
             IDiagnosticsLogger<DbLoggerCategory.Database.Command> logger,
-            IRelationalTypeMapper typeMapper)
+            IRelationalTypeMappingSource typeMapper)
             : base(logger, typeMapper)
         {
         }
@@ -48,14 +48,14 @@ namespace Microsoft.EntityFrameworkCore.Storage.Internal
         /// <inheritdoc />
         protected override IRelationalCommandBuilder CreateCore(
             IDiagnosticsLogger<DbLoggerCategory.Database.Command> logger,
-            IRelationalTypeMapper relationalTypeMapper)
+            IRelationalTypeMappingSource relationalTypeMapper)
             => new SpannerRelationalCommandBuilder(logger, relationalTypeMapper);
 
         private sealed class SpannerRelationalCommandBuilder : RelationalCommandBuilder
         {
             public SpannerRelationalCommandBuilder(
                 IDiagnosticsLogger<DbLoggerCategory.Database.Command> logger,
-                IRelationalTypeMapper typeMapper)
+                IRelationalTypeMappingSource typeMapper)
                 : base(logger, typeMapper)
             {
             }
@@ -286,7 +286,7 @@ namespace Microsoft.EntityFrameworkCore.Storage.Internal
                     return result;
                 }
 
-                private DbCommand CreateCommand(
+                private new DbCommand CreateCommand(
                     IRelationalConnection connection,
                     IReadOnlyDictionary<string, object> parameterValues)
                 {

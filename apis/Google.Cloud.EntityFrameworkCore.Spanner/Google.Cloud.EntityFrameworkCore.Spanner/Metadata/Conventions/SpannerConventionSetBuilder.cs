@@ -15,6 +15,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.EntityFrameworkCore.Metadata.Conventions
 {
@@ -39,14 +40,20 @@ namespace Microsoft.EntityFrameworkCore.Metadata.Conventions
         /// </summary>
         public static ConventionSet Build()
         {
-            var spannerTypeMapper = new SpannerTypeMapper(new RelationalTypeMapperDependencies());
+            var serviceProvider = new ServiceCollection()
+                .AddEntityFrameworkSpanner()
+                .AddDbContext<DbContext>((p, o) =>
+                    o.UseSpanner("Data Source=.")
+                        .UseInternalServiceProvider(p))
+                .BuildServiceProvider();
 
-            return new SpannerConventionSetBuilder(
-                    new RelationalConventionSetBuilderDependencies(spannerTypeMapper, null, null))
-                .AddConventions(
-                    new CoreConventionSetBuilder(
-                            new CoreConventionSetBuilderDependencies(spannerTypeMapper))
-                        .CreateConventionSet());
+            using (var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                using (var context = serviceScope.ServiceProvider.GetService<DbContext>())
+                {
+                    return ConventionSet.CreateConventionSet(context);
+                }
+            }
         }
     }
 }

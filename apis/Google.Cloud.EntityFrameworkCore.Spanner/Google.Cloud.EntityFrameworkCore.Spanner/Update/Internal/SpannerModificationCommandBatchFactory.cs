@@ -23,13 +23,13 @@ namespace Microsoft.EntityFrameworkCore.Update.Internal
     public class SpannerModificationCommandBatchFactory : IModificationCommandBatchFactory
     {
         private readonly IDiagnosticsLogger<DbLoggerCategory.Database.Command> _logger;
-        private readonly IRelationalTypeMapper _typeMapper;
+        private readonly IRelationalTypeMappingSource _typeMapper;
 
         /// <summary>
         /// </summary>
         /// <param name="typeMapper"></param>
         /// <param name="logger"></param>
-        public SpannerModificationCommandBatchFactory(IRelationalTypeMapper typeMapper,
+        public SpannerModificationCommandBatchFactory(IRelationalTypeMappingSource typeMapper,
             IDiagnosticsLogger<DbLoggerCategory.Database.Command> logger)
         {
             _typeMapper = typeMapper;
