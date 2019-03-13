@@ -57,7 +57,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .TryAdd<IMigrationsSqlGenerator, SpannerMigrationsSqlGenerator>()
                 .TryAdd<IRelationalDatabaseCreator, SpannerDatabaseCreator>()
                 .TryAdd<IConventionSetBuilder, SpannerConventionSetBuilder>()
-                //.TryAdd<IHistoryRepository, SpannerHistoryRepository>()
+                .TryAdd<IHistoryRepository, SpannerHistoryRepository>()
                 .TryAdd<IRelationalConnection>(p => p.GetService<ISpannerRelationalConnection>())
                 .TryAdd<IExecutionStrategyFactory, RelationalExecutionStrategyFactory>()
                 //QUERY SERVICES
