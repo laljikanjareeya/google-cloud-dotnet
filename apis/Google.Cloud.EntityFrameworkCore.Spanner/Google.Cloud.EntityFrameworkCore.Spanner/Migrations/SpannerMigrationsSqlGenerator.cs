@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
 using Google.Api.Gax;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
-namespace Google.Cloud.EntityFrameworkCore.Spanner.Migrations
+namespace Microsoft.EntityFrameworkCore.Migrations
 {
     /// <summary>
     /// Customizes the default migration sql generator to create Spanner compatible Ddl.
@@ -111,8 +111,33 @@ namespace Google.Cloud.EntityFrameworkCore.Spanner.Migrations
 
             if (terminate)
             {
+                builder.AppendLine(Dependencies.SqlGenerationHelper.StatementTerminator);
                 EndStatement(builder, true);
             }
+        }
+
+        protected override void Generate(RenameTableOperation operation, IModel model,
+           MigrationCommandListBuilder builder)
+        {
+            throw new NotSupportedException("Rename Table name is not Supported By Google Cloud Spanner.");
+        }
+
+        protected override void Generate(CreateTableOperation operation, IModel model,
+           MigrationCommandListBuilder builder)
+           => Generate(operation, model, builder, terminate: true);
+
+
+
+        protected override void Generate(DropForeignKeyOperation operation, IModel model,
+            MigrationCommandListBuilder builder)
+        {
+            // Foreign keys are not supported by spanner and are ignored.
+        }
+
+        protected override void Generate(AddForeignKeyOperation operation, IModel model,
+           MigrationCommandListBuilder builder)
+        {
+            // Foreign keys are not supported by spanner and are ignored.
         }
 
         protected override void Generate(AddForeignKeyOperation operation, IModel model,
@@ -131,6 +156,42 @@ namespace Google.Cloud.EntityFrameworkCore.Spanner.Migrations
             builder.Append("(")
                 .Append(ColumnList(operation.Columns))
                 .Append(")");
+        }
+
+        protected override void Generate(DropForeignKeyOperation operation, IModel model,
+            MigrationCommandListBuilder builder, bool terminate)
+        {
+            // Foreign keys are not supported by spanner and are ignored.
+        }
+
+
+        protected override void Generate(DropIndexOperation operation, IModel model,
+            MigrationCommandListBuilder builder)
+        {
+            Generate(operation, model, builder, true);
+        }
+
+        protected virtual void Generate(DropIndexOperation operation, IModel model,
+            MigrationCommandListBuilder builder, bool terminate)
+        {
+            builder.Append(" DROP INDEX ")
+                     .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Name));
+
+            if (terminate)
+            {
+                builder
+                    .AppendLine(Dependencies.SqlGenerationHelper.StatementTerminator)
+                    .EndCommand();
+            }
+        }
+
+
+        protected override void Generate(
+           RenameColumnOperation operation,
+           IModel model,
+           MigrationCommandListBuilder builder)
+        {
+            throw new NotSupportedException("Rename Column name is not Supported By Google Cloud Spanner.");
         }
 
         private static string GetCorrectedColumnType(string columnType)
