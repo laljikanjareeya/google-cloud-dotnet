@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using Google.Api.Gax;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
@@ -35,11 +36,31 @@ namespace Microsoft.EntityFrameworkCore.Migrations
             {"BYTES", "BYTES(MAX)"}
         };
 
+        /// <summary>
+        ///     This API supports the Entity Framework Core infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        /// <param name="dependencies"> Parameter object containing dependencies for this service. </param>
         public SpannerMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies)
             : base(dependencies)
         {
         }
 
+        /// <summary>
+        ///     <para>
+        ///         Builds commands for the given <see cref="MigrationOperation" /> by making calls on the given
+        ///         <see cref="MigrationCommandListBuilder" />.
+        ///     </para>
+        ///     <para>
+        ///         This method uses a double-dispatch mechanism to call one of the 'Generate' methods that are
+        ///         specific to a certain subtype of <see cref="MigrationOperation" />. Typically database providers
+        ///         will override these specific methods rather than this method. However, providers can override
+        ///         this methods to handle provider-specific operations.
+        ///     </para>
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
         protected override void Generate(MigrationOperation operation, IModel model,
             MigrationCommandListBuilder builder)
         {
@@ -57,7 +78,16 @@ namespace Microsoft.EntityFrameworkCore.Migrations
             }
         }
 
-        private void GenerateDropDatabase(string name, IModel model, MigrationCommandListBuilder builder)
+
+        /// <summary>
+        ///     Builds commands for Drop The Database
+        ///     by making calls on the given <see cref="MigrationCommandListBuilder" />.
+        /// </summary>
+        /// <param name="name"> The operation name. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
+        private void GenerateDropDatabase(string name, IModel model,
+            MigrationCommandListBuilder builder)
         {
             builder
                 .Append("DROP DATABASE ")
@@ -67,7 +97,15 @@ namespace Microsoft.EntityFrameworkCore.Migrations
             EndStatement(builder, true);
         }
 
-        private void GenerateCreateDatabase(string name, IModel model, MigrationCommandListBuilder builder)
+        /// <summary>
+        ///     Builds commands for Create Database
+        ///     by making calls on the given <see cref="MigrationCommandListBuilder" />.
+        /// </summary>>
+        /// <param name="name">The operation name.</param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
+        private void GenerateCreateDatabase(string name, IModel model,
+            MigrationCommandListBuilder builder)
         {
             builder
                 .Append("CREATE DATABASE ")
@@ -77,6 +115,14 @@ namespace Microsoft.EntityFrameworkCore.Migrations
             EndStatement(builder, true);
         }
 
+        /// <summary>
+        ///     Builds commands for the given <see cref="CreateTableOperation" /> by making calls on the given
+        ///     <see cref="MigrationCommandListBuilder" />
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
+        /// <param name="terminate"></param>
         protected override void Generate(
             CreateTableOperation operation,
             IModel model,
@@ -116,36 +162,74 @@ namespace Microsoft.EntityFrameworkCore.Migrations
             }
         }
 
+        /// <summary>
+        ///     Throws <see cref="NotSupportedException" /> since this operation requires table rebuilds, which
+        ///     are not yet supported.
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
         protected override void Generate(RenameTableOperation operation, IModel model,
            MigrationCommandListBuilder builder)
         {
-            throw new NotSupportedException("Rename Table name is not Supported By Google Cloud Spanner.");
+            throw new NotSupportedException(SpannerStrings.InvalidMigrationOperation(operation.GetType().ShortDisplayName()));
         }
 
+        /// <summary>
+        ///     Builds commands for the given <see cref="CreateTableOperation" /> by making calls on the given
+        ///     <see cref="MigrationCommandListBuilder" />, and then terminates the final command.
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
         protected override void Generate(CreateTableOperation operation, IModel model,
            MigrationCommandListBuilder builder)
            => Generate(operation, model, builder, terminate: true);
 
-
-
+        /// <summary>
+        /// Foreign keys are not supported by spanner and are ignored.
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
         protected override void Generate(DropForeignKeyOperation operation, IModel model,
             MigrationCommandListBuilder builder)
         {
             // Foreign keys are not supported by spanner and are ignored.
         }
 
+        /// <summary>
+        /// Foreign keys are not supported by spanner and are ignored.
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
         protected override void Generate(AddForeignKeyOperation operation, IModel model,
            MigrationCommandListBuilder builder)
         {
             // Foreign keys are not supported by spanner and are ignored.
         }
 
+        /// <summary>
+        /// Foreign keys are not supported by spanner and are ignored.
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
+        /// <param name="terminate"></param>
         protected override void Generate(AddForeignKeyOperation operation, IModel model,
             MigrationCommandListBuilder builder, bool terminate)
         {
             // Foreign keys are not supported by spanner and are ignored.
         }
 
+        /// <summary>
+        ///     Builds commands for the given <see cref="AddPrimaryKeyOperation" /> by making calls on the given
+        ///     <see cref="MigrationCommandListBuilder" />
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
         protected override void PrimaryKeyConstraint(
             AddPrimaryKeyOperation operation,
             IModel model,
@@ -158,6 +242,13 @@ namespace Microsoft.EntityFrameworkCore.Migrations
                 .Append(")");
         }
 
+        /// <summary>
+        /// Foreign keys are not supported by spanner and are ignored.
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
+        /// <param name="terminate"></param>
         protected override void Generate(DropForeignKeyOperation operation, IModel model,
             MigrationCommandListBuilder builder, bool terminate)
         {
@@ -165,12 +256,27 @@ namespace Microsoft.EntityFrameworkCore.Migrations
         }
 
 
+        /// <summary>
+        ///     Builds commands for the given <see cref="DropIndexOperation" />
+        ///     by making calls on the given <see cref="MigrationCommandListBuilder" />, and then terminates the final command.
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
         protected override void Generate(DropIndexOperation operation, IModel model,
             MigrationCommandListBuilder builder)
         {
             Generate(operation, model, builder, true);
         }
 
+        /// <summary>
+        ///     Builds commands for the given <see cref="DropIndexOperation" />
+        ///     by making calls on the given <see cref="MigrationCommandListBuilder" />.
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
+        /// <param name="terminate"> Indicates whether or not to terminate the command after generating SQL for the operation. </param>
         protected virtual void Generate(DropIndexOperation operation, IModel model,
             MigrationCommandListBuilder builder, bool terminate)
         {
@@ -186,12 +292,19 @@ namespace Microsoft.EntityFrameworkCore.Migrations
         }
 
 
+        /// <summary>
+        ///     Throws <see cref="NotSupportedException" /> since this operation requires table rebuilds, which
+        ///     are not yet supported.
+        /// </summary>
+        /// <param name="operation"> The operation. </param>
+        /// <param name="model"> The target model which may be <c>null</c> if the operations exist without a model. </param>
+        /// <param name="builder"> The command builder to use to build the commands. </param>
         protected override void Generate(
            RenameColumnOperation operation,
            IModel model,
            MigrationCommandListBuilder builder)
         {
-            throw new NotSupportedException("Rename Column name is not Supported By Google Cloud Spanner.");
+            throw new NotSupportedException(SpannerStrings.InvalidMigrationOperation(operation.GetType().ShortDisplayName()));
         }
 
         private static string GetCorrectedColumnType(string columnType)

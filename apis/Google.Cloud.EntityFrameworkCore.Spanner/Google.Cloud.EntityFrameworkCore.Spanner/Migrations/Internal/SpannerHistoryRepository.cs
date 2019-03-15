@@ -1,10 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
+﻿// Copyright 2017 Google Inc. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.EntityFrameworkCore.Migrations.Internal
 {
@@ -64,27 +74,10 @@ namespace Microsoft.EntityFrameworkCore.Migrations.Internal
         /// </summary>
         public override string GetCreateIfNotExistsScript()
         {
+            //TODO: Need to Check with support of 'IF Exist' while creating migration history table
             var builder = new IndentedStringBuilder();
 
-            builder.Append("IF OBJECT_ID(N'");
-
-            if (TableSchema != null)
-            {
-                builder
-                    .Append(SqlGenerationHelper.EscapeLiteral(TableSchema))
-                    .Append(".");
-            }
-
-            builder
-                .Append(SqlGenerationHelper.EscapeLiteral(TableName))
-                .AppendLine("') IS NULL")
-                .AppendLine("BEGIN");
-            using (builder.Indent())
-            {
-                builder.AppendLines(GetCreateScript());
-            }
-            builder.AppendLine("END;");
-
+            builder.AppendLines(GetCreateScript());
             return builder.ToString();
         }
 
@@ -94,16 +87,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations.Internal
         /// </summary>
         public override string GetBeginIfNotExistsScript(string migrationId)
         {
-            return new StringBuilder()
-                .Append("IF NOT EXISTS(SELECT * FROM ")
-                .Append(SqlGenerationHelper.DelimitIdentifier(TableName, TableSchema))
-                .Append(" WHERE ")
-                .Append(SqlGenerationHelper.DelimitIdentifier(MigrationIdColumnName))
-                .Append(" = N'")
-                .Append(SqlGenerationHelper.EscapeLiteral(migrationId))
-                .AppendLine("')")
-                .Append("BEGIN")
-                .ToString();
+            throw new NotSupportedException(SpannerStrings.MigrationScriptGenerationNotSupported);
         }
 
         /// <summary>
@@ -112,18 +96,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations.Internal
         /// </summary>
         public override string GetBeginIfExistsScript(string migrationId)
         {
-            //Check.NotEmpty(migrationId, nameof(migrationId));
-
-            return new StringBuilder()
-                 .Append("IF EXISTS(SELECT * FROM ")
-                 .Append(SqlGenerationHelper.DelimitIdentifier(TableName, TableSchema))
-                 .Append(" WHERE ")
-                 .Append(SqlGenerationHelper.DelimitIdentifier(MigrationIdColumnName))
-                 .Append(" = N'")
-                 .Append(SqlGenerationHelper.EscapeLiteral(migrationId))
-                 .AppendLine("')")
-                 .Append("BEGIN")
-                 .ToString();
+            throw new NotSupportedException(SpannerStrings.MigrationScriptGenerationNotSupported);
         }
 
         /// <summary>
@@ -131,9 +104,8 @@ namespace Microsoft.EntityFrameworkCore.Migrations.Internal
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public override string GetEndIfScript()
-            => new StringBuilder()
-                .Append("END")
-                .AppendLine(SqlGenerationHelper.StatementTerminator)
-                .ToString();
+        {
+            throw new NotSupportedException(SpannerStrings.MigrationScriptGenerationNotSupported);
+        }
     }
 }
