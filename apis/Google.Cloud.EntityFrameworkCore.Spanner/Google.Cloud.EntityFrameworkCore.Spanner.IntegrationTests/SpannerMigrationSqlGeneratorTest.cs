@@ -13,6 +13,9 @@
 // limitations under the License.
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using System;
 using Xunit;
 
 namespace Google.Cloud.EntityFrameworkCore.Spanner.IntegrationTests
@@ -43,10 +46,11 @@ namespace Google.Cloud.EntityFrameworkCore.Spanner.IntegrationTests
             base.DropIndexOperation();
         }
 
-        [Fact(Skip = "NYI")]
+        [Fact]
         public override void RenameTableOperation_within_schema()
         {
-            base.RenameTableOperation_within_schema();
+            var ex = Assert.Throws<NotSupportedException>(() => base.RenameTableOperation_within_schema());
+            Assert.Equal(SpannerStrings.InvalidMigrationOperation(nameof(RenameTableOperation)), ex.Message);
         }
     }
 }

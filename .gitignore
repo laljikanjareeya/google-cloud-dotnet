@@ -52,3 +52,4 @@ BenchmarkDotNet.Artifacts
 
 # Log files
 build_timing_log.txt
+/apis/Google.Cloud.EntityFrameworkCore.Spanner/TestResults
