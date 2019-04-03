@@ -50,7 +50,7 @@ namespace Google.Cloud.EntityFrameworkCore.Spanner.IntegrationTests
         public override void RenameTableOperation_within_schema()
         {
             var ex = Assert.Throws<NotSupportedException>(() => base.RenameTableOperation_within_schema());
-            Assert.Equal(SpannerStrings.InvalidMigrationOperation(nameof(RenameTableOperation)), ex.Message);
+            Assert.Equal("Google Cloud Spanner does not support this migration operation 'RenameTableOperation'.", ex.Message);
         }
     }
 }

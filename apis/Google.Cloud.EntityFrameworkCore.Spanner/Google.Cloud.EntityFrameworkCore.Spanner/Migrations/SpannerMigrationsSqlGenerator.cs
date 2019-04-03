@@ -172,7 +172,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations
         protected override void Generate(RenameTableOperation operation, IModel model,
            MigrationCommandListBuilder builder)
         {
-            throw new NotSupportedException(SpannerStrings.InvalidMigrationOperation(operation.GetType().ShortDisplayName()));
+            throw new NotSupportedException("Google Cloud Spanner does not support this migration operation 'RenameTableOperation'.");
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations
            IModel model,
            MigrationCommandListBuilder builder)
         {
-            throw new NotSupportedException(SpannerStrings.InvalidMigrationOperation(operation.GetType().ShortDisplayName()));
+            throw new NotSupportedException($"Google Cloud Spanner does not support this migration operation 'RenameColumnOperation'.");
         }
 
         private static string GetCorrectedColumnType(string columnType)

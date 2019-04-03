@@ -1,4 +1,0 @@
-﻿<#
-    Session["ResourceFile"] = "SpannerStrings.resx";
-#>
-<#@ include file="../Tools/Resources.tt" #>

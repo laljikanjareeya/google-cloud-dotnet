@@ -68,7 +68,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations
             var repository = CreateHistoryRepository();
             var ex = Assert.Throws<NotSupportedException>(() => repository.GetBeginIfNotExistsScript("Migration1"));
 
-            Assert.Equal(SpannerStrings.MigrationScriptGenerationNotSupported, ex.Message);
+            Assert.Equal("Generating idempotent scripts for migration is not currently supported by Google Cloud Spanner.", ex.Message);
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations
             var repository = CreateHistoryRepository();
             var ex = Assert.Throws<NotSupportedException>(() => repository.GetBeginIfExistsScript("Migration1"));
 
-            Assert.Equal(SpannerStrings.MigrationScriptGenerationNotSupported, ex.Message);
+            Assert.Equal("Generating idempotent scripts for migration is not currently supported by Google Cloud Spanner.", ex.Message);
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations
             var repository = CreateHistoryRepository();
             var ex = Assert.Throws<NotSupportedException>(() => repository.GetEndIfScript());
 
-            Assert.Equal(SpannerStrings.MigrationScriptGenerationNotSupported, ex.Message);
+            Assert.Equal("Generating idempotent scripts for migration is not currently supported by Google Cloud Spanner.", ex.Message);
         }
 
         private static IHistoryRepository CreateHistoryRepository()

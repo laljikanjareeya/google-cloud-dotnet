@@ -87,7 +87,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations.Internal
         /// </summary>
         public override string GetBeginIfNotExistsScript(string migrationId)
         {
-            throw new NotSupportedException(SpannerStrings.MigrationScriptGenerationNotSupported);
+            throw new NotSupportedException("Generating idempotent scripts for migration is not currently supported by Google Cloud Spanner.");
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations.Internal
         /// </summary>
         public override string GetBeginIfExistsScript(string migrationId)
         {
-            throw new NotSupportedException(SpannerStrings.MigrationScriptGenerationNotSupported);
+            throw new NotSupportedException("Generating idempotent scripts for migration is not currently supported by Google Cloud Spanner.");
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations.Internal
         /// </summary>
         public override string GetEndIfScript()
         {
-            throw new NotSupportedException(SpannerStrings.MigrationScriptGenerationNotSupported);
+            throw new NotSupportedException("Generating idempotent scripts for migration is not currently supported by Google Cloud Spanner.");
         }
     }
 }
