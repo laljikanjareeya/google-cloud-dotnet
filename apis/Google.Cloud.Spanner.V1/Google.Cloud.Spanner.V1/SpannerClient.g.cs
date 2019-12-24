@@ -29,6 +29,9 @@ using linq = System.Linq;
 using sysnet = System.Net;
 using st = System.Threading;
 using stt = System.Threading.Tasks;
+using Google.Cloud.Spanner.V1.Internal;
+using System.Linq;
+using Google.Api.Gax.Grpc;
 
 namespace Google.Cloud.Spanner.V1
 {
@@ -345,6 +348,14 @@ namespace Google.Cloud.Spanner.V1
     public abstract partial class SpannerClient
     {
         /// <summary>
+        /// Resource based routing environment variable value
+        /// </summary>
+        public static string ResourceBasedRoutingVariable = sys.Environment.GetEnvironmentVariable("GOOGLE_CLOUD_ENABLE_RESOURCE_BASED_ROUTING");
+        /// <summary>
+        /// Resource based routing flag
+        /// </summary>
+        public static bool ResourceBasedRoutingFlag = !string.IsNullOrWhiteSpace(ResourceBasedRoutingVariable) && ResourceBasedRoutingVariable == "true";
+        /// <summary>
         /// The default endpoint for the Spanner service, which is a host of "spanner.googleapis.com" and a port of 443.
         /// </summary>
         public static gaxgrpc::ServiceEndpoint DefaultEndpoint { get; } = new gaxgrpc::ServiceEndpoint("spanner.googleapis.com", 443);
@@ -398,10 +409,20 @@ namespace Google.Cloud.Spanner.V1
         /// </example>
         /// <param name="endpoint">Optional <see cref="gaxgrpc::ServiceEndpoint"/>.</param>
         /// <param name="settings">Optional <see cref="SpannerSettings"/>.</param>
+        /// <param name="instanceId">Optional</param>
         /// <returns>The task representing the created <see cref="SpannerClient"/>.</returns>
-        public static async stt::Task<SpannerClient> CreateAsync(gaxgrpc::ServiceEndpoint endpoint = null, SpannerSettings settings = null)
+        public static async stt::Task<SpannerClient> CreateAsync(gaxgrpc::ServiceEndpoint endpoint = null, SpannerSettings settings = null, string instanceId = null)
         {
-            grpccore::Channel channel = await ChannelPool.GetChannelAsync(endpoint ?? DefaultEndpoint).ConfigureAwait(false);
+            var endpointUri = endpoint ?? DefaultEndpoint;
+            if (!string.IsNullOrWhiteSpace(instanceId) && ResourceBasedRoutingFlag)
+            {
+                var instanceEndPoints = ResourceBasedRoutingHelper.GetInstanceEndpointUris(instanceId);
+                if (instanceEndPoints.Any())
+                {
+                    endpointUri = new ServiceEndpoint(instanceEndPoints.FirstOrDefault());
+                }
+            }
+            grpccore::Channel channel = await ChannelPool.GetChannelAsync(endpointUri).ConfigureAwait(false);
             return Create(channel, settings);
         }
 
@@ -438,10 +459,20 @@ namespace Google.Cloud.Spanner.V1
         /// </example>
         /// <param name="endpoint">Optional <see cref="gaxgrpc::ServiceEndpoint"/>.</param>
         /// <param name="settings">Optional <see cref="SpannerSettings"/>.</param>
+        /// <param name="instanceId">Optional</param>
         /// <returns>The created <see cref="SpannerClient"/>.</returns>
-        public static SpannerClient Create(gaxgrpc::ServiceEndpoint endpoint = null, SpannerSettings settings = null)
+        public static SpannerClient Create(gaxgrpc::ServiceEndpoint endpoint = null, SpannerSettings settings = null, string instanceId = null)
         {
-            grpccore::Channel channel = ChannelPool.GetChannel(endpoint ?? DefaultEndpoint);
+            var endpointUri = endpoint ?? DefaultEndpoint;
+            if (!string.IsNullOrWhiteSpace(instanceId) && ResourceBasedRoutingFlag)
+            {
+                var instanceEndPoints = ResourceBasedRoutingHelper.GetInstanceEndpointUris(instanceId);
+                if (instanceEndPoints.Any())
+                {
+                    endpointUri = new ServiceEndpoint(instanceEndPoints.FirstOrDefault());
+                }
+            }
+            grpccore::Channel channel = ChannelPool.GetChannel(endpointUri);
             return Create(channel, settings);
         }
 
@@ -479,12 +510,12 @@ namespace Google.Cloud.Spanner.V1
 
         /// <summary>
         /// Shuts down any channels automatically created by <see cref="Create(grpccore::CallInvoker,SpannerSettings)"/>
-        /// and <see cref="CreateAsync(gaxgrpc::ServiceEndpoint,SpannerSettings)"/>. Channels which weren't
+        /// and <see cref="CreateAsync(gaxgrpc::ServiceEndpoint,SpannerSettings,string)"/>. Channels which weren't
         /// automatically created are not affected.
         /// </summary>
         /// <remarks>
         /// After calling this method, further calls to <see cref="Create(grpccore::CallInvoker,SpannerSettings)"/> and
-        /// <see cref="CreateAsync(gaxgrpc::ServiceEndpoint,SpannerSettings)"/> will create new channels, which could in
+        /// <see cref="CreateAsync(gaxgrpc::ServiceEndpoint,SpannerSettings,string)"/> will create new channels, which could in
         /// turn be shut down by another call to this method.
         /// </remarks>
         /// <returns>A task representing the asynchronous shutdown operation.</returns>
