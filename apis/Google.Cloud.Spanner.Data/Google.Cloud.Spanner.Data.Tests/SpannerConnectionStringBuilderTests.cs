@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Google.Cloud.Spanner.Common.V1;
+using Google.Cloud.Spanner.Data.Tests.V1;
 using Google.Cloud.Spanner.V1;
 using System;
 using Xunit;
@@ -94,6 +95,7 @@ namespace Google.Cloud.Spanner.Data.Tests
         }
 
         [Fact]
+        [ResourceBasedRoutingBeforeAfter]
         public void DefaultEndpointIfNotSpecified()
         {
             var builder = new SpannerConnectionStringBuilder();
@@ -112,6 +114,7 @@ namespace Google.Cloud.Spanner.Data.Tests
         }
 
         [Fact]
+        [ResourceBasedRoutingBeforeAfter]
         public void EndPointSettableViaProperty()
         {
             var connectionStringBuilder = new SpannerConnectionStringBuilder

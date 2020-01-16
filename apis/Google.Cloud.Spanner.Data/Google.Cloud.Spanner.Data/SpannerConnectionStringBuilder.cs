@@ -146,13 +146,35 @@ namespace Google.Cloud.Spanner.Data
         /// </summary>
         public ServiceEndpoint EndPoint => new ServiceEndpoint(Host, Port);
 
+        private InstanceHostManager _instanceHostManager = InstanceHostManager.Default;
+
+        /// <summary>
+        /// The <see cref="InstanceHostManager"/> to get host for instance.
+        /// </summary>
+        /// <remarks>
+        /// This property defaults to <see cref="InstanceHostManager.Default"/>
+        /// </remarks>
+        public InstanceHostManager InstanceHostManager
+        {
+            get => _instanceHostManager;
+            set => _instanceHostManager = GaxPreconditions.CheckNotNull(value, nameof(value));
+        }
+
         /// <summary>
         /// The TCP Host name to connect to Spanner. If not supplied in the connection string, the default
         /// host will be used.
         /// </summary>
         public string Host
         {
-            get => GetValueOrDefault(nameof(Host), SpannerClient.DefaultEndpoint.Host);
+            get
+            {
+                string host = InstanceHostManager.GetHost(Project, SpannerInstance);
+                if (host != null)
+                {
+                    return host;
+                }
+                return GetValueOrDefault(nameof(Host), SpannerClient.DefaultEndpoint.Host);
+            }
             set => this[nameof(Host)] = value;
         }
 
@@ -367,7 +389,7 @@ namespace Google.Cloud.Spanner.Data
             {
                 return parsed >= minValue && parsed <= maxValue ? parsed : defaultValue;
             }
-            return defaultValue;            
+            return defaultValue;
         }
 
         private void SetInt32WithValidation(string key, int minValue, int maxValue, int value)

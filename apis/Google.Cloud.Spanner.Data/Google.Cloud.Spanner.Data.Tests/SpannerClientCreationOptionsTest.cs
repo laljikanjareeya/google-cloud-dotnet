@@ -14,6 +14,7 @@
 
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.ClientTesting;
+using Google.Cloud.Spanner.Data.Tests.V1;
 using Grpc.Auth;
 using System;
 using System.IO;
@@ -23,6 +24,7 @@ using Xunit;
 
 namespace Google.Cloud.Spanner.Data.Tests
 {
+    [ResourceBasedRoutingBeforeAfter]
     public class SpannerClientCreationOptionsTest
     {
         [Fact]
